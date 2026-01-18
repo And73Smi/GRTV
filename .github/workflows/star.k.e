@@ -22,5 +22,5 @@ jobs:
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
           git add star_channel.m3u8
-          git commit -m "Update M3U8 link" || exit 0
+          git commit -m "streams updated" 
           git push
