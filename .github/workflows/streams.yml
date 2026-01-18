@@ -53,7 +53,7 @@ jobs:
             python3 dailymotion.py x3b68jn > ../../streams/CNEWS.m3u8
             python3 dailymotion.py k5Hfx6eeaTjBE5zRXcn > ../../streams/STAR_KENTRIKHS_ELLADAS.m3u8
             python3 dailymotion.py 1ilp5b3jja3168a4092 > ../../streams/STAR_KENTRIKHS_ELLADAS_2.m3u8
-            python3 digitalstar.py digitalstar > ../../streams/STAR_KENTRIKHS_ELLADAS_2.m3u8
+            
       - name: git add
         run: |
           git add -A
