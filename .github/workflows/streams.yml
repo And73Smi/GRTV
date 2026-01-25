@@ -38,6 +38,7 @@ jobs:
             python3 twitch.py farostv1959 > ../../streams/FAROS_TV_EKKLISIA.m3u8
             python3 twitch.py fatsabooktv > ../../streams/FATSABOOK_TV.m3u8
             python3 twitch.py younowflashtv > ../../streams/FLASH_TV.m3u8
+            python3 twitch.py freeangelwebtv > ../../streams/FREE_ANGEL.m3u8
             python3 twitch.py hotbeatstv > ../../streams/HOTBEAST_TV.m3u8
             python3 twitch.py iviewtvgr  > ../../streams/IVIEW_TV.m3u8
             python3 twitch.py konitsaplustv > ../../streams/KONITSA_TV.m3u8
