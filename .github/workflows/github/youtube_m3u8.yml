@@ -1,0 +1,35 @@
+name: Update YouTube M3U8
+on:
+  schedule:
+    - cron: '*/30 * * * *' # Τρέχει κάθε 30 λεπτά
+  workflow_dispatch:      # Επιτρέπει χειροκίνητη εκτέλεση
+
+jobs:
+  get_link:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install yt-dlp
+        run: |
+          sudo curl -L https://github.com -o /usr/local/bin/yt-dlp
+          sudo chmod a+rx /usr/local/bin/yt-dlp
+
+      - name: Extract M3U8 URL
+        run: |
+          # Αντικατάστησε το URL παρακάτω αν αλλάξεις βίντεο
+          yt-dlp -g "https://www.youtube.com/watch?v=uWIhV9gQClg" > live.m3u8
+          echo "Link extracted successfully"
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add live.m3u8
+          git commit -m "Update YouTube Live Link" || exit 0
+          git push
+
+
