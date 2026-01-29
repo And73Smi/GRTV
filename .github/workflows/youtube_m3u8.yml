@@ -13,41 +13,36 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-
-      - name: Install Dependencies
+      - name: Extract M3U8 via Invidious API
         run: |
-          python -m pip install --upgrade pip
-          # Εγκατάσταση yt-dlp και του απαραίτητου plugin για το n-challenge
-          pip install yt-dlp
+          # Χρησιμοποιούμε ένα δημόσιο instance του Invidious για να πάρουμε το m3u8
+          # Το uWIhV9gQClg είναι το ID του βίντεο
+          VIDEO_ID="uWIhV9gQClg"
+          
+          # Δοκιμάζουμε να πάρουμε το stream URL
+          RESULT=$(curl -s "https://invidious.projectsegfau.lt" | jq -r '.hlsUrl // empty')
+          
+          if [ -z "$RESULT" ]; then
+            # Εναλλακτικό instance αν το πρώτο αποτύχει
+            RESULT=$(curl -s "https://iv.ggtyler.dev" | jq -r '.hlsUrl // empty')
+          fi
 
-      - name: Extract M3U8 URL
-        env:
-          COOKIE_DATA: ${{ secrets.YT_COOKIES }}
-        run: |
-          echo "$COOKIE_DATA" > cookies.txt
-          
-          # Χρήση του IOS client που είναι πιο "χαλαρός" με τα challenges
-          # και προσθήκη bypass για το bot detection
-          python3 -m yt_dlp --cookies cookies.txt \
-          --user-agent "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1" \
-          --extractor-args "youtube:player-client=ios,web;n-challenge-handler=web" \
-          -f "best" \
-          -g "https://www.youtube.com/watch?v=uWIhV9gQClg" > live.m3u8
-          
-          echo "Link extracted: $(cat live.m3u8)"
-          rm cookies.txt
+          if [ -z "$RESULT" ]; then
+            echo "Failed to extract link from all instances"
+            exit 1
+          else
+            echo "$RESULT" > live.m3u8
+            echo "Link extracted: $RESULT"
+          fi
 
       - name: Commit and Push
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
           git add live.m3u8
-          git commit -m "Update YouTube Live (IOS Client Bypass)" || exit 0
+          git commit -m "Update via Invidious Proxy" || exit 0
           git push
+
 
 
 
