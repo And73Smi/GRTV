@@ -13,6 +13,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -20,29 +25,33 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install yt-dlp
 
       - name: Extract M3U8 URL
         env:
           COOKIE_DATA: ${{ secrets.YT_COOKIES }}
         run: |
-          # Δημιουργία αρχείου cookies από το Secret
           echo "$COOKIE_DATA" > cookies.txt
           
-          # Εκτέλεση με χρήση cookies και αποφυγή bot detection
+          # Χρήση του --extractor-args για να παρακάμψουμε το n-challenge
+          # και επιλογή συγκεκριμένου format που δίνει m3u8
           python3 -m yt_dlp --cookies cookies.txt \
-          --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
+          --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36" \
+          --extractor-args "youtube:player-client=web,android;player-skip=web_embedded_client_config" \
+          -f "best[ext=mp4]/best" \
           -g "https://www.youtube.com/watch?v=uWIhV9gQClg" > live.m3u8
           
           echo "Link extracted: $(cat live.m3u8)"
-          rm cookies.txt # Διαγραφή για ασφάλεια
+          rm cookies.txt
 
       - name: Commit and Push
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
           git add live.m3u8
-          git commit -m "Update YouTube Live Link with Cookies" || exit 0
+          git commit -m "Update YouTube Live with JS Runtime" || exit 0
           git push
+
 
 
