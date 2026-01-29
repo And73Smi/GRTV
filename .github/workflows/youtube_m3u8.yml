@@ -13,35 +13,40 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Extract M3U8 via Invidious API
+      - name: Extract M3U8 via Piped API
         run: |
-          # Χρησιμοποιούμε ένα δημόσιο instance του Invidious για να πάρουμε το m3u8
-          # Το uWIhV9gQClg είναι το ID του βίντεο
           VIDEO_ID="uWIhV9gQClg"
           
-          # Δοκιμάζουμε να πάρουμε το stream URL
-          RESULT=$(curl -s "https://invidious.projectsegfau.lt" | jq -r '.hlsUrl // empty')
-          
-          if [ -z "$RESULT" ]; then
-            # Εναλλακτικό instance αν το πρώτο αποτύχει
-            RESULT=$(curl -s "https://iv.ggtyler.dev" | jq -r '.hlsUrl // empty')
-          fi
+          # Δοκιμή σε πολλαπλά Piped Instances για σιγουριά
+          ENDPOINTS=(
+            "https://pipedapi.kavin.rocks"
+            "https://pipedapi.drgns.space"
+            "https://piped-api.lunar.icu"
+          )
 
-          if [ -z "$RESULT" ]; then
-            echo "Failed to extract link from all instances"
-            exit 1
-          else
-            echo "$RESULT" > live.m3u8
-            echo "Link extracted: $RESULT"
-          fi
+          for api in "${ENDPOINTS[@]}"; do
+            echo "Trying $api..."
+            RESPONSE=$(curl -s "$api/streams/$VIDEO_ID")
+            HLS_URL=$(echo "$RESPONSE" | jq -r '.hls // empty')
+            
+            if [ ! -z "$HLS_URL" ] && [ "$HLS_URL" != "null" ]; then
+              echo "$HLS_URL" > live.m3u8
+              echo "Success! Link: $HLS_URL"
+              exit 0
+            fi
+          done
+
+          echo "Could not extract M3U8 from any API."
+          exit 1
 
       - name: Commit and Push
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
           git add live.m3u8
-          git commit -m "Update via Invidious Proxy" || exit 0
+          git commit -m "Update via Piped Proxy" || exit 0
           git push
+
 
 
 
