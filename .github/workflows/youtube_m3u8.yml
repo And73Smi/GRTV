@@ -13,18 +13,21 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
       - name: Install yt-dlp
         run: |
-          # Κατέβασμα του σωστού binary αρχείου
-          sudo wget https://github.com -O /usr/local/bin/yt-dlp
-          sudo chmod a+rx /usr/local/bin/yt-dlp
+          python -m pip install --upgrade pip
+          pip install yt-dlp
 
       - name: Extract M3U8 URL
         run: |
-          # Χρήση του yt-dlp για εξαγωγή του link
-          # Το --quiet μειώνει τα περιττά μηνύματα
-          /usr/local/bin/yt-dlp -g "https://www.youtube.com/watch?v=uWIhV9gQClg" > live.m3u8
-          echo "Link extracted: $(cat live.m3u8)"
+          # Χρήση του python module πλέον για ασφάλεια
+          python3 -m yt_dlp -g "https://www.youtube.com/watch?v=uWIhV9gQClg" > live.m3u8
+          echo "Extracted Link: $(cat live.m3u8)"
 
       - name: Commit and Push
         run: |
@@ -33,4 +36,5 @@ jobs:
           git add live.m3u8
           git commit -m "Update YouTube Live Link" || exit 0
           git push
+
 
