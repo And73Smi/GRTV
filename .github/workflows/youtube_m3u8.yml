@@ -1,32 +1,18 @@
-name: Update YouTube M3U8
-on:
-  schedule:
-    - cron: '*/30 * * * *'
-  workflow_dispatch:
-
-jobs:
-  get_link:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
       - name: Extract M3U8 via Piped API
         run: |
           VIDEO_ID="uWIhV9gQClg"
           
-          # Δοκιμή σε πολλαπλά Piped Instances για σιγουριά
+          # Λίστα με πιο σταθερά API instances
           ENDPOINTS=(
             "https://pipedapi.kavin.rocks"
-            "https://pipedapi.drgns.space"
-            "https://piped-api.lunar.icu"
+            "https://api.piped.victr.me"
+            "https://pipedapi.rivo.pw"
           )
 
           for api in "${ENDPOINTS[@]}"; do
             echo "Trying $api..."
-            RESPONSE=$(curl -s "$api/streams/$VIDEO_ID")
+            # Το -k παρακάμπτει το SSL Error (Code 60), το -L ακολουθεί redirects
+            RESPONSE=$(curl -skL "$api/streams/$VIDEO_ID")
             HLS_URL=$(echo "$RESPONSE" | jq -r '.hls // empty')
             
             if [ ! -z "$HLS_URL" ] && [ "$HLS_URL" != "null" ]; then
@@ -38,14 +24,6 @@ jobs:
 
           echo "Could not extract M3U8 from any API."
           exit 1
-
-      - name: Commit and Push
-        run: |
-          git config --global user.name "GitHub Action"
-          git config --global user.email "action@github.com"
-          git add live.m3u8
-          git commit -m "Update via Piped Proxy" || exit 0
-          git push
 
 
 
