@@ -71,8 +71,8 @@ jobs:
           python3 twitch.py xtvision2 > ../../streams/XTVISION_2.m3u8 
           
           # Dailymotion Streams
-          python3 dailymotion.py video/xar7s56 > ../../streams/EURONEWS.m3u8
-
+          python3 dailymotion.py xar7s56 > ../../streams/EURONEWS.m3u8
+          python3 dailymotion.py x3b68jn > ../../streams/C_NEWS.m3u8
 
       - name: Commit & Push changes
         run: |
